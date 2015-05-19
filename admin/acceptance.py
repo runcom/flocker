@@ -78,21 +78,19 @@ def run_client_tests(reactor, node):
         else:
             return f
 
-    return sequence([
-        run(
-            reactor, ['trial', 'flocker.cli']).addCallbacks(
-            callback=lambda _: 0,
-            errback=check_result,
-            ),
+    return
+    trial = run(reactor, ['trial', 'flocker.cli'])
+    trial.addCallback(
         perform(make_dispatcher(reactor), run_remotely(
             username=node.get_default_username(),
             address=node.address,
             commands=task_client_installation_test()
-            )).addCallbacks(
-                callback=lambda _: 0,
-                errback=check_result,
-                )
-        ])
+            )))
+    trial.addCallbacks(
+        callback=lambda _: 0,
+        errback=check_result,
+        )
+    return trial
 
 
 def run_cluster_tests(
