@@ -346,7 +346,7 @@ class GenericAgentScript(PRecord):
         configuration = yaml.safe_load(agent_config.getContent())
 
         validate_configuration(configuration=configuration)
-        volume_service = VolumeService(
+        volume_service_new = VolumeService(
             config_path=DEFAULT_CONFIG_PATH,
             pool=FLOCKER_POOL,
             reactor=reactor,
@@ -354,7 +354,7 @@ class GenericAgentScript(PRecord):
 
         deployer_factory = dataset_deployer_from_configuration(
             dataset_configuration=configuration['dataset'],
-            volume_service=volume_service
+            volume_service=volume_service_new
         )
 
         service_factory = AgentServiceFactory(
@@ -363,10 +363,10 @@ class GenericAgentScript(PRecord):
 
         service = service_factory(reactor, options)
 
-        # if configuration['dataset']['backend'] == 'zfs':
-        #     # XXX This should not be a special case,
-        #     # see https://clusterhq.atlassian.net/browse/FLOC-1924.
-        #     volume_service.setServiceParent(service)
+        if configuration['dataset']['backend'] == 'zfs':
+            # XXX This should not be a special case,
+            # see https://clusterhq.atlassian.net/browse/FLOC-1924.
+            volume_service.setServiceParent(service)
 
         return main_for_service(
             reactor=reactor,
