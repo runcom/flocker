@@ -369,7 +369,7 @@ class GenericAgentScript(PRecord):
         if configuration['dataset']['backend'] == 'zfs':
             # XXX This should not be a special case,
             # see https://clusterhq.atlassian.net/browse/FLOC-1924.
-            volume_service_new.setServiceParent(service)
+            volume_service.setServiceParent(service)
 
         return main_for_service(
             reactor=reactor,
