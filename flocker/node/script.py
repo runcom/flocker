@@ -354,7 +354,7 @@ class GenericAgentScript(PRecord):
 
         deployer_factory = dataset_deployer_from_configuration(
             dataset_configuration=configuration['dataset'],
-            volume_service=volume_service_new
+            volume_service=volume_service,
         )
 
         service_factory = AgentServiceFactory(
