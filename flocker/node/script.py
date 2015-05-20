@@ -27,6 +27,7 @@ from ..volume.service import (
 )
 
 from ..volume.script import flocker_volume_options
+from ..volume.filesystems.memory import FilesystemStoragePool
 from ..common.script import (
     ICommandLineScript,
     flocker_standard_options, FlockerScriptRunner, main_for_service)
@@ -345,16 +346,18 @@ class GenericAgentScript(PRecord):
         agent_config = options[u'agent-config']
         configuration = yaml.safe_load(agent_config.getContent())
 
+        from tempfile import mkdtemp
         validate_configuration(configuration=configuration)
+        pool = FilesystemStoragePool(FilePath(mkdtemp()))
         volume_service_new = VolumeService(
-            config_path=DEFAULT_CONFIG_PATH,
-            pool=FLOCKER_POOL,
+            config_path=FilePath(mkdtemp()).child('volume.json'),
+            pool=pool,
             reactor=reactor,
         )
 
         deployer_factory = dataset_deployer_from_configuration(
             dataset_configuration=configuration['dataset'],
-            volume_service=volume_service,
+            volume_service=volume_service_new,
         )
 
         service_factory = AgentServiceFactory(
@@ -366,7 +369,7 @@ class GenericAgentScript(PRecord):
         if configuration['dataset']['backend'] == 'zfs':
             # XXX This should not be a special case,
             # see https://clusterhq.atlassian.net/browse/FLOC-1924.
-            volume_service.setServiceParent(service)
+            volume_service_new.setServiceParent(service)
 
         return main_for_service(
             reactor=reactor,

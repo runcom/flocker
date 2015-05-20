@@ -119,6 +119,7 @@ class VolumeService(Service):
                 self._config_path.setContent(json.dumps({u"uuid": uuid,
                                                          u"version": 1}))
         except OSError as e:
+            import pdb; pdb.set_trace()
             raise CreateConfigurationError(e.args[1])
         config = json.loads(self._config_path.getContent())
         self.node_id = config[u"uuid"]
