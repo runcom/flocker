@@ -333,7 +333,6 @@ def dataset_deployer_from_configuration(dataset_configuration, volume_service):
     )
 
 
-@implementer(ICommandLineVolumeScript)
 class GenericAgentScript(PRecord):
     """
     Implement top-level logic for the ``flocker-dataset-agent`` script.
@@ -342,14 +341,15 @@ class GenericAgentScript(PRecord):
     ``zfs_dataset_deployer``. The majority of this script will be in
     ``flocker_dataset_agent_main`` and ``AgentScript``. See FLOC-1924.
     """
-    def main(self, reactor, options, volume_service):
+    def main(self, reactor, options):
         agent_config = options[u'agent-config']
         configuration = yaml.safe_load(agent_config.getContent())
 
         from tempfile import mkdtemp
         validate_configuration(configuration=configuration)
         pool = FilesystemStoragePool(FilePath(mkdtemp()))
-        volume_service_new = VolumeService(
+
+        volume_service = VolumeService(
             config_path=FilePath(mkdtemp()).child('volume.json'),
             pool=pool,
             reactor=reactor,
@@ -388,7 +388,7 @@ def flocker_dataset_agent_main():
     options = DatasetAgentOptions()
 
     return FlockerScriptRunner(
-        script=VolumeScript(GenericAgentScript()),
+        script=GenericAgentScript(),
         options=options,
     ).main()
 
